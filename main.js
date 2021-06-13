@@ -27,7 +27,7 @@ const weekDays = [
 // Add AJAX functions here:
 const getVenues = async() => {
     const city = $input.val();
-    const urlToFetch = `${url}${city}&limit=10&client_id=${clientId}client_secret=${clientSecret}&v=20210610`;
+    const urlToFetch = `${url}${city}&limit=10&client_id=${clientId}&client_secret=${clientSecret}&v=20210610`;
     try{
         const response = await fetch(urlToFetch);
         if (response.ok) {
@@ -42,7 +42,7 @@ const getVenues = async() => {
 };
 
 const getForecast = async() => {
-    const urlToFetch = `${weatherUrl}&appid${openWeatherKey}&q${$input.val()}`;
+    const urlToFetch = `${weatherUrl}?&q=${$input.val()}&APPID=${openWeatherKey}`;//APPID or appid? ASK!!
     //const urlToFetch = weatherUrl +'&q' +$input.val() + '&appid=' + openWeatherKey;
     try{
         const response = await fetch(urlToFetch);
@@ -60,8 +60,11 @@ const getForecast = async() => {
 const renderVenues = (venues) => {
   $venueDivs.forEach(($venue, index) => {
     // Add your code here:
-
-    let venueContent = "";
+    const venue = venues[index];
+    const venueIcon = venue.categories[0].icon;
+    //console.log(venueIcon);
+    const venueImgSrc = `${venueIcon.prefix}bg_64${venueIcon.suffix}`;
+    let venueContent = createVenueHTML(venue.name, venue.location, venueImgSrc);
     $venue.append(venueContent);
   });
   $destination.append(`<h2>${venues[0].location.city}</h2>`);
@@ -70,7 +73,7 @@ const renderVenues = (venues) => {
 const renderForecast = (day) => {
   // Add your code here:
 
-  let weatherContent = "";
+  let weatherContent = createWeatherHTML(day);
   $weatherDiv.append(weatherContent);
 };
 
@@ -79,8 +82,12 @@ const executeSearch = () => {
   $weatherDiv.empty();
   $destination.empty();
   $container.css("visibility", "visible");
-  getVenues();
-  getForecast();
+  getVenues().then((venues) => {
+      return renderVenues(venues);
+  });
+  getForecast().then((forecast) => {
+      return renderForecast(forecast);
+  });
   return false;
 };
 
